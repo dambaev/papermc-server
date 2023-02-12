@@ -135,7 +135,6 @@ in
               # agree with eula and adjust port
               sed -i "s/eula=false/eula=true/" eula.txt
 
-              touch 
               # inited
               touch "${instanceDir}/inited"
             fi
