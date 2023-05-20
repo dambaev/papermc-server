@@ -60,6 +60,11 @@ let
           }
         '';
       };
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.papermc;
+        defaultText = literalExpression "pkgs.papermc";
+      };
     };
   };
 in
@@ -76,8 +81,8 @@ in
   };
 
   config = lib.mkIf (eachInstance != {}) {
-    environment.systemPackages = [ pkgs.papermc ];
-    networking.firewall.allowedUDPPorts = [ 19132];
+    environment.systemPackages = [ eachInstance.package ];
+    networking.firewall.allowedUDPPorts = [ 19132] ++ lib.mapAttrsToList (name: cfg: cfg.port) eachInstance;
     networking.firewall.allowedTCPPorts = lib.mapAttrsToList (name: cfg: cfg.port) eachInstance;
     # create user
     systemd.services = ( lib.mapAttrs' (name: cfg: lib.nameValuePair "papermc-${name}" (
@@ -98,7 +103,7 @@ in
           StartLimitBurst = 10;
         };
         path = with pkgs; [
-          papermc
+          eachInstance.package
           wget
           gnused
           bashInteractive
