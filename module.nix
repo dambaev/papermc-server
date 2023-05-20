@@ -63,7 +63,7 @@ let
       package = lib.mkOption {
         type = lib.types.package;
         default = pkgs.papermc;
-        defaultText = literalExpression "pkgs.papermc";
+        defaultText = lib.literalExpression "pkgs.papermc";
       };
     };
   };
@@ -81,7 +81,7 @@ in
   };
 
   config = lib.mkIf (eachInstance != {}) {
-    environment.systemPackages = [ eachInstance.package ];
+    environment.systemPackages = lib.mapAttrsToList (name: cfg: cfg.package) eachInstance;
     networking.firewall.allowedUDPPorts = [ 19132] ++ lib.mapAttrsToList (name: cfg: cfg.port) eachInstance;
     networking.firewall.allowedTCPPorts = lib.mapAttrsToList (name: cfg: cfg.port) eachInstance;
     # create user
@@ -103,7 +103,7 @@ in
           StartLimitBurst = 10;
         };
         path = with pkgs; [
-          eachInstance.package
+          cfg.package
           wget
           gnused
           bashInteractive
